@@ -31,61 +31,90 @@ def get_hourly_heatmap():
   END_DATE = pd.to_datetime(data['Start Date'], dayfirst=True).max().date()
   
   data['hour'] = data.index.hour
-  def create_heatmap_data(column):
-      return data.groupby(['hour', data.index.day])[column].sum().unstack()
   
-  z_impressions = create_heatmap_data('Impressions')
-  z_clicks = create_heatmap_data('Clicks')
-  z_orders = create_heatmap_data('7 Day Total Orders (#)')
+  def create_heatmap_data(column, data_to_use):
+      return data_to_use.groupby(['hour', data_to_use.index.day])[column].sum().unstack()
   
   # x and y axis labels
   x_labels = data.index.day.unique().dropna().sort_values().values.astype(str)
   y_labels = data.index.hour.unique().dropna().values.astype(str)
   
-  
-  
-  ## Create buttons for updating heatmap and annotations
-  buttons = [
+  # Metric Buttons
+  metric_buttons = [
       dict(label="Impressions",
            method="update",
-           args=[{
-               "z": [z_impressions.values],
-               'title': f'{STORE_NAME} Impressions Heatmap'
-           }]),
+           args=[{"z": [z_impressions.values]}, 
+                 {"title": f'{STORE_NAME} Impressions Heatmap'}]),
       dict(label="Clicks",
            method="update",
-           args=[{
-               "z": [z_clicks.values],
-               'title': f'{STORE_NAME} Clicks Heatmap'
-           }]),
+           args=[{"z": [z_clicks.values]}, 
+                 {"title": f'{STORE_NAME} Clicks Heatmap'}]),
       dict(label="Orders",
            method="update",
-           args=[{
-               "z": [z_orders.values],
-               'title': f'{STORE_NAME} Orders Heatmap'
-           }])
+           args=[{"z": [z_orders.values]}, 
+                 {"title": f'{STORE_NAME} Orders Heatmap'}])
   ]
   
-  # Create initial heatmap figure
+  
+  # Dropdown for campaigns
+  campaign_dropdown = []
+  
+  campaign_names = data['Campaign Name'].unique()
+  for campaign_name in campaign_names:
+      filtered_data = data[data['Campaign Name'] == campaign_name]
+      
+      z_data_impressions = create_heatmap_data('Impressions', filtered_data)
+      
+      campaign_option = dict(
+          args=[{"z": [z_data_impressions.values], "title": f"{STORE_NAME} Impressions Heatmap for Campaign: {campaign_name}"}],
+          label=campaign_name,
+          method="update"
+      )
+      
+      campaign_dropdown.append(campaign_option)
+  
+  # Add a "None" option to the dropdown to reset the filter
+  none_option = dict(
+      args=[{"z": [z_impressions.values], "title": f"{STORE_NAME} Impressions Heatmap"}],
+      label="None",
+      method="update"
+  )
+  campaign_dropdown.append(none_option)
+  
+  # Create heatmap figure
   fig = go.Figure(go.Heatmap(z=z_impressions.values,
                              x=x_labels,
                              y=y_labels,
                              colorscale="rdbu",
                              showscale=True))
   
-  # Apply the default annotations for "Impressions" and other settings
   fig.update_layout(
       height=750,
       width=1200,
-          updatemenus=[
+      updatemenus=[
+          # Metric buttons
           dict(
               type="buttons",
+              buttons=metric_buttons,
+              direction="down",
               showactive=True,
-              buttons=buttons
-          ) ],   
-  
-      title='Impressions Heatmap',
-  
+              x=1.25,
+              y=1.2,
+              xanchor='left',
+              yanchor='top'
+          ),
+          # Campaign dropdown
+          dict(
+              buttons=campaign_dropdown,
+              direction="down",
+              showactive=True,
+              x=0.1,
+              y=1.1,
+              xanchor='left',
+              yanchor='top'
+          )
+      ],
+      title= f'{STORE_NAME} Impressions Heatmap'
   )
   
   fig.update_yaxes(title_text="Hours", tickvals=np.arange(len(y_labels)), ticktext=y_labels)
