@@ -35,9 +35,17 @@ def get_hourly_heatmap():
   def create_heatmap_data(column, data_to_use):
       return data_to_use.groupby(['hour', data_to_use.index.day])[column].sum().unstack()
   
+  #Apply Function
+  z_impressions = create_heatmap_data('Impressions')
+  z_clicks = create_heatmap_data('Clicks')
+  z_orders = create_heatmap_data('7 Day Total Orders (#)')
+
+  
   # x and y axis labels
   x_labels = data.index.day.unique().dropna().sort_values().values.astype(str)
   y_labels = data.index.hour.unique().dropna().values.astype(str)
+
+
   
   # Metric Buttons
   metric_buttons = [
