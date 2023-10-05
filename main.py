@@ -59,14 +59,15 @@ def get_hourly_heatmap():
 
   # Metric Buttons
   metric_buttons = [
-      dict(label='Sales',
-      method='update',
-      args=[{'z': [z_sales.values]},
-            {"title": f'{STORE_NAME} Sales Heatmap'}]),
       dict(label="Impressions",
            method="update",
            args=[{"z": [z_impressions.values]},
                  {"title": f'{STORE_NAME} Impressions Heatmap'}]),
+      dict(label='Sales',
+      method='update',
+      args=[{'z': [z_sales.values]},
+            {"title": f'{STORE_NAME} Sales Heatmap'}]),
+      
       dict(label="Clicks",
            method="update",
            args=[{"z": [z_clicks.values]},
