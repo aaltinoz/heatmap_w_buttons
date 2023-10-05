@@ -36,9 +36,9 @@ def get_hourly_heatmap():
       return data_to_use.groupby(['hour', data_to_use.index.day])[column].sum().unstack()
   
   #Apply Function
-  z_impressions = create_heatmap_data('Impressions')
-  z_clicks = create_heatmap_data('Clicks')
-  z_orders = create_heatmap_data('7 Day Total Orders (#)')
+  z_impressions = create_heatmap_data('Impressions',data)
+  z_clicks = create_heatmap_data('Clicks',data)
+  z_orders = create_heatmap_data('7 Day Total Orders (#)',data)
 
   
   # x and y axis labels
