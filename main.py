@@ -21,11 +21,12 @@ for fn in uploaded.keys():
 
   print('User uploaded file "{name}" with length {length} bytes'.format(name=fn, length=len(uploaded[fn])))
 
-#Get data
+# # #Get data
 filename = list(uploaded.keys())[0]
 data = pd.read_csv(filename)
+
 data['time'] = data.iloc[:,2]
-data.index = pd.to_datetime(pd.to_datetime(data['Start Date'] + ' ' + data['time'].astype(str) + ':00').dt.strftime('%Y-%m-%d %H:%M:%S'))
+data.index = pd.to_datetime(pd.to_datetime(data['Start Date'] + ' ' + data['time'].astype(str) + ':00').dt.strftime('%m/%d/%Y %H:%M:%S'))
 data['Sales'] = data.iloc[:,20]
 data['Sales'] = data['Sales'].str.replace('£', '').str.replace('$', '').str.replace('.', '').astype('float32')/100
 data['spend'] = data.iloc[:,15]
@@ -35,8 +36,8 @@ data['hour'] = data.index.hour
 
 def get_hourly_heatmap():
   # Get globals
-  START_DATE = pd.to_datetime(data['Start Date'], dayfirst=True).min().date()
-  END_DATE = pd.to_datetime(data['Start Date'], dayfirst=True).max().date()
+  START_DATE = (pd.to_datetime(data['Start Date']).min()).strftime('%b/%d/%y')
+  END_DATE =(pd.to_datetime(data['Start Date']).max()).strftime('%b/%d/%y')
 
 
 
@@ -55,41 +56,51 @@ def get_hourly_heatmap():
   x_labels = data.index.day.unique().dropna().sort_values().values.astype(str)
   y_labels = data.index.hour.unique().dropna().values.astype(str)
 
-
+  # Sort Dates
+  sorted_dates = np.unique(data.index.date)
+  formatted_dates = [date.strftime('%b/%d') for date in sorted_dates]
+  
+  # Define a function to generate a hover template based on the metric name
+  def generate_hover_template(metric_name):
+      return f"Day: %{{x}}<br>Hours: %{{y}}<br>{metric_name}: %{{z}}"
 
   # Metric Buttons
   metric_buttons = [
-      dict(label="Impressions",
-           method="update",
-           args=[{"z": [z_impressions.values]},
-                 {"title": f'{STORE_NAME} Impressions Heatmap'}]),
-      dict(label='Sales',
-      method='update',
-      args=[{'z': [z_sales.values]},
-            {"title": f'{STORE_NAME} Sales Heatmap'}]),
-      
-      dict(label="Clicks",
-           method="update",
-           args=[{"z": [z_clicks.values]},
-                 {"title": f'{STORE_NAME} Clicks Heatmap'}]),
-      dict(label="Orders",
-           method="update",
-           args=[{"z": [z_orders.values]},
-                 {"title": f'{STORE_NAME} Orders Heatmap'}]),
-      dict(label='Spend',
-           method='update',
-           args=[{'z': [z_spend.values]},
-                 {"title": f'{STORE_NAME} Spend Heatmap'}])
+    dict(label="Impressions",
+         method="update",
+         args=[{"z": [z_impressions.values],
+                "hovertemplate": generate_hover_template("Impressions")},
+               {"title": f'{STORE_NAME} Impressions Heatmap {START_DATE} - {END_DATE}'}]),
+    dict(label='Sales',
+         method='update',
+         args=[{'z': [z_sales.values],
+                "hovertemplate": generate_hover_template("Sales")},
+               {"title": f'{STORE_NAME} Sales Heatmap {START_DATE} - {END_DATE}'}]),
+    dict(label="Clicks",
+         method="update",
+         args=[{"z": [z_clicks.values],
+                "hovertemplate": generate_hover_template("Clicks")},
+               {"title": f'{STORE_NAME} Clicks Heatmap {START_DATE} - {END_DATE}'}]),
+    dict(label="Orders",
+         method="update",
+         args=[{"z": [z_orders.values],
+                "hovertemplate": generate_hover_template("Orders")},
+               {"title": f'{STORE_NAME} Orders Heatmap {START_DATE} - {END_DATE}'}]),
+    dict(label='Spend',
+         method='update',
+         args=[{'z': [z_spend.values],
+                "hovertemplate": generate_hover_template("Spend")},
+               {"title": f'{STORE_NAME} Spend Heatmap {START_DATE} - {END_DATE}'}])
+    ]
 
-  ]
 
   # Dropdown for campaigns
   campaign_dropdown = []
 
   # Add a "None" option to the dropdown to reset the filter
   none_option = dict(
-      args=[{"z": [z_impressions.values], "title": f"{STORE_NAME} Impressions Heatmap"}],
-      label="None",
+      args=[{"z": [z_impressions.values], "title": f"{STORE_NAME} Impressions Heatmap {START_DATE} - {END_DATE}"}],
+      label="All Campaigns",
       method="update"
   )
   campaign_dropdown.append(none_option)
@@ -113,14 +124,17 @@ def get_hourly_heatmap():
 
   # Create heatmap figure
   fig = go.Figure(go.Heatmap(z=z_impressions.values,
-                             x=x_labels,
-                             y=y_labels,
-                             colorscale="rdbu",
-                             showscale=True))
+                           x=formatted_dates,
+                           y=y_labels,
+                           colorscale="rdbu",
+                           showscale=True,
+                            name="",  # Set name as empty
+                           showlegend=False,  # Ensure legend doesn't show
+                           hovertemplate=generate_hover_template("Impressions")))
 
   fig.update_layout(
       height=750,
-      width=1200,
+      width=1300,
       updatemenus=[
           # Metric buttons
           dict(
@@ -128,8 +142,8 @@ def get_hourly_heatmap():
               buttons=metric_buttons,
               direction="down",
               showactive=True,
-              x=1.25,
-              y=1.2,
+              x=1.10,
+              y=1.015,
               xanchor='left',
               yanchor='top'
           ),
@@ -138,18 +152,20 @@ def get_hourly_heatmap():
               buttons=campaign_dropdown,
               direction="down",
               showactive=True,
-              x=0.1,
-              y=1.1,
+              x=0,
+              y=1.07,
               xanchor='left',
               yanchor='top'
           )
       ],
-      title= f'{STORE_NAME} Impressions Heatmap'
+      title= f'{STORE_NAME} Impressions Heatmap {START_DATE} - {END_DATE}'
   )
 
+
   fig.update_yaxes(title_text="Hours", tickvals=np.arange(len(y_labels)), ticktext=y_labels)
-  fig.update_xaxes(title_text="Days", tickvals=list(data.index.day.unique().dropna().sort_values().values.astype(str)), ticktext=x_labels)
+  fig.update_xaxes(title_text="Days", 
+                 tickvals=np.arange(0, len(formatted_dates), 1),
+                 ticktext=formatted_dates)
 
   fig.show()
   return None
-
