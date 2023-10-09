@@ -9,36 +9,38 @@ import datetime
 from datetime import datetime
 from google.colab import files
 
-STORE_NAME = input("Please enter store name: ")
-print("Please upload Sponsored Products Campaign data as a csv file")
-uploaded = files.upload()
-
-for fn in uploaded.keys():
-
-  print('User uploaded file "{name}" with length {length} bytes'.format(name=fn, length=len(uploaded[fn])))
-
-# # #Get data
-filename = list(uploaded.keys())[0]
-data = pd.read_csv(filename)
 
 
 
-# preprocess
-data['time'] = data.iloc[:, 2]
-data.index = pd.to_datetime(
-    pd.to_datetime(data['Start Date'] + ' ' + data['time'].astype(str) + ':00').dt.strftime('%m/%d/%Y %H:%M:%S'))
-data['Sales'] = data.iloc[:, 20]
-data['Sales'] = data['Sales'].str.replace('£', '').str.replace('$', '').str.replace('.', '').astype('float32') / 100
-data['spend'] = data.iloc[:, 15]
-data['spend'] = data['spend'].str.replace('£', '').str.replace('$', '').str.replace('.', '').astype('float32') / 100
-data['hour'] = data.index.hour
-data['groupby_col'] = data.index.to_series().dt.strftime('%b/%d')
-data['Orders'] = data.iloc[:, 17]
-START_DATE = (pd.to_datetime(data['Start Date']).min()).strftime('%b/%d/%y')
-END_DATE = (pd.to_datetime(data['Start Date']).max()).strftime('%b/%d/%y')
-y_labels = data.index.hour.unique().dropna().values.astype(str)
+
 
 def run_dash_app():
+  STORE_NAME = input("Please enter store name: ")
+  print("Please upload Sponsored Products Campaign data as a csv file")
+  uploaded = files.upload()
+
+  for fn in uploaded.keys():
+
+    print('User uploaded file "{name}" with length {length} bytes'.format(name=fn, length=len(uploaded[fn])))
+
+  # # #Get data
+  filename = list(uploaded.keys())[0]
+  data = pd.read_csv(filename)
+    # preprocess
+  data['time'] = data.iloc[:, 2]
+  data.index = pd.to_datetime(
+      pd.to_datetime(data['Start Date'] + ' ' + data['time'].astype(str) + ':00').dt.strftime('%m/%d/%Y %H:%M:%S'))
+  data['Sales'] = data.iloc[:, 20]
+  data['Sales'] = data['Sales'].str.replace('£', '').str.replace('$', '').str.replace('.', '').astype('float32') / 100
+  data['spend'] = data.iloc[:, 15]
+  data['spend'] = data['spend'].str.replace('£', '').str.replace('$', '').str.replace('.', '').astype('float32') / 100
+  data['hour'] = data.index.hour
+  data['groupby_col'] = data.index.to_series().dt.strftime('%b/%d')
+  data['Orders'] = data.iloc[:, 17]
+  START_DATE = (pd.to_datetime(data['Start Date']).min()).strftime('%b/%d/%y')
+  END_DATE = (pd.to_datetime(data['Start Date']).max()).strftime('%b/%d/%y')
+  y_labels = data.index.hour.unique().dropna().values.astype(str)
+
   app = dash.Dash(__name__)
 
   app.layout = html.Div([
