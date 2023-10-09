@@ -99,6 +99,6 @@ def run_dash_app():
       return fig
 
   
-    app.run(jupyter_mode='external')
+  app.run(jupyter_mode='external')
 
   
