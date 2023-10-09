@@ -98,10 +98,10 @@ def run_dash_app():
                       ticktext=sorted(np.unique(data.groupby_col.values), key=lambda x: datetime.strptime(x, '%b/%d')))
       return fig
 
-  if __name__ == '__main__':
-      app.run(jupyter_mode='external')
+  
+    app.run(jupyter_mode='external')
 
-  return None
+
 
 # Run app
 run_dash_app()
