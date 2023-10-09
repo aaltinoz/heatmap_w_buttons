@@ -101,5 +101,7 @@ def run_dash_app():
   if __name__ == '__main__':
       app.run(jupyter_mode='external')
 
+  return None
+
 # Run app
 run_dash_app()
