@@ -31,9 +31,9 @@ def run_dash_app():
   data.index = pd.to_datetime(
       pd.to_datetime(data['Start Date'] + ' ' + data['time'].astype(str) + ':00').dt.strftime('%m/%d/%Y %H:%M:%S'))
   data['Sales'] = data.iloc[:, 20]
-  data['Sales'] = data['Sales'].str.replace('£', '').str.replace('$', '').str.replace('.', '').astype('float32') / 100
+  data['Sales'] = data['Sales'].str.replace('£', '').str.replace('$', '').str.replace('.', '').str.replace(',','').astype('float32') / 100
   data['spend'] = data.iloc[:, 15]
-  data['spend'] = data['spend'].str.replace('£', '').str.replace('$', '').str.replace('.', '').astype('float32') / 100
+  data['spend'] = data['spend'].str.replace('£', '').str.replace('$', '').str.replace('.', '').str.replace(',','').astype('float32') / 100
   data['hour'] = data.index.hour
   data['groupby_col'] = data.index.to_series().dt.strftime('%b/%d')
   data['Orders'] = data.iloc[:, 17]
