@@ -83,14 +83,13 @@ def run_dash_app():
           y=heatmap_data.index.tolist(),
           colorscale='Greens'
       ))
-      fig.update_layout(title=f'{STORE_NAME} {selected_metric} Heatmap {START_DATE} - {END_DATE}',
+      fig.update_layout(font_family= 'Courier New',
+                        title=f'{STORE_NAME} {selected_metric} Heatmap {START_DATE} - {END_DATE}',
                         xaxis_title='Date',
                         yaxis_title='Hour of Day',
                         width=1000,
                         height=600,
-                        font=dict(
-                            family='Roboto'
-                        )
+            
                         )
       fig.update_yaxes(title_text="Hours", tickvals=np.arange(len(y_labels)), ticktext=y_labels)
       fig.update_xaxes(title_text="Days",
