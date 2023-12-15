@@ -50,13 +50,13 @@ def run_dash_app():
                                                                   data['Campaign Name'].unique()],
           value='All',
           multi=False,
-          style={"fontFamily": "Oswald", "fontSize": "18px"}
+          style={"fontFamily": "Courier New", "fontSize": "18px"}
       ),
       dcc.RadioItems(
           id='metric-radio',
           options=[{'label': i, 'value': i} for i in ['Impressions', 'Clicks', 'spend', 'Sales', 'Orders']],
           value='Impressions',
-          style={"fontFamily": "Oswald", "fontSize": "18px"}
+          style={"fontFamily": "Courier New", "fontSize": "18px"}
       ),
       dcc.Graph(id='heatmap'),
   ])
